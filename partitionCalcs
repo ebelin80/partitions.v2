@@ -1,0 +1,175 @@
+Private num
+Private segment
+Private Sub CommandButton1_Click()
+
+ Open "C:partionsV2.text" For Output As #1
+ 
+ Dim g(10000, 1000)
+ Dim j2(10000)
+ 
+ Let num = 20 'partition number
+ Let segment = 6 'group number or segment length
+ 
+ Let i = 0
+ Let j = 0
+ Let g(i, j) = num
+ Let j2(i) = 1
+ Let sum = g(i, j)
+ Let x = 0
+ 
+ Call partitions(g(), i, j, j2(), sum, Total)
+ Print #1,
+ Print #1, "total-> "; Total + 1
+ Print #1,
+ Print #1,
+ For i = 0 To Total
+  Let s = 0
+  Print #1, Format(i, "@@@@"); " ";
+  For j = 0 To j2(i) - 1
+   Print #1, g(i, j); " ";
+   Let s = s + g(i, j)
+  Next j
+  Print #1,
+ Next i
+ 
+ Close #1
+
+End Sub
+Private Sub partitions(n(), i, j, j2(), sum, i2)
+ Dim sum2(2000)
+ Do
+  Do
+   If n(i, j) > 1 And n(i, j + 1) > 1 Then
+    Let sum = sum - n(i, j)
+    Let n(i + 1, j) = n(i, j)
+   
+   ElseIf n(i, j) > 1 And n(i, j + 1) <= 1 Then
+     
+     Call partitionCalcs(n(), i, j, j2(), sum)
+     Let i3 = i + 1
+     
+     If x = 1 Then
+      For j3 = 0 To j2(i3)
+       If j3 < j2(i3) Then
+        Let n(i, j3) = n(i3, j3)
+       Else
+        Let n(i, j3) = 1
+        Let n(i3, j3) = 1
+       End If
+      Next j3
+      Let j2(i) = j2(i3)
+     
+      If j2(i) > segment Then
+       Let i3 = i3 - 1
+      End If
+      Let x = 0
+      Let i = i - 1
+      Let i2 = i2 - 1
+     End If
+     
+     If j2(i3) > segment Then   'omits any segments that are longer than the specified length
+      Let x = 1
+      Call recalculate(n(), i3, j, j2())
+      
+     End If
+    Exit Do
+   End If
+   Let j = j + 1
+  Loop Until j = j2(i)
+   
+   Let i = i + 1
+   Let i2 = i2 + 1
+
+  Let j = 0
+ 
+  Let sum = num
+ 
+  If j2(i) = segment Then
+   Call partitionStopCase(n(), i, segment, qn, r0, c0, c1)
+   If c0 = segment - r0 And c1 = r0 Then
+    Exit Do
+   Else
+    Let c0 = 0
+    Let c1 = 0
+   End If
+  End If
+ 
+ Loop Until j2(i) = num + 1
+End Sub
+Private Sub partitionCalcs(n(), i, j, j2(), sum)
+
+ Let nMinus = n(i, j) - 1
+ Let q = Int(sum / nMinus)
+ Let r = sum - q * nMinus
+    
+ For j3 = j To (j + q) - 1
+  Let n(i + 1, j3) = nMinus
+ Next j3
+ If r > 0 Then
+  Let j2(i + 1) = j + q + 1
+  Let n(i + 1, j3) = r
+ Else
+  Let j2(i + 1) = j + q
+ End If
+ Let j3 = 0
+ Do
+  If n(i + 1, j3 + 1) <= 1 Then
+   Let nj = j3
+   Let j = j3
+   
+   Exit Do
+  End If
+  Let j3 = j3 + 1
+ Loop Until j3 = j2(i + 1)
+ 
+End Sub
+Private Sub recalculate(n(), i, j, j2()) 'recalculates whenever the new segment length exceeds
+                                         'the specified length
+ If n(i, j) > 2 Then
+  Let n(i, j + 1) = 1
+  Let j2(i) = j + 1
+  Let j3 = j
+ ElseIf j > 0 And n(i, j) = 2 Then
+  Let j3 = j - 1
+  Do
+   If n(i, j3) > n(i, j) Then
+    Let n(i, j3 + 1) = 1
+    Let j2(i) = j3 + 2
+    Exit Do
+   End If
+   Let j3 = j3 - 1
+  Loop Until j3 = -1
+  If j3 = -1 Then
+   Let j3 = 0
+   Let n(i, j3 + 1) = 1
+   Let j2(i) = 2
+  End If
+ ElseIf j = 0 Then
+  Let j3 = 0
+  Let n(i, j3 + 1) = 1
+  Let j2(i) = 2
+ End If
+ 
+ Let k = j3
+ For j3 = 0 To j2(i)
+  If j3 > k Then
+   Let n(i, j3) = 1
+  Else
+  End If
+ Next j3
+ 
+End Sub
+Private Sub partitionStopCase(n(), i, segment, qn, r0, c0, c1) 'stops the calculation loop when
+                                                               'segment lengths will no longer
+                                                               'regress back to the specified length
+ Let qn = num / segment
+ Let r0 = num - Int(qn) * segment
+ Let qn = Int(qn)
+ 
+ For j3 = 0 To segment - 1
+  If n(i, j3) = qn Then
+   Let c0 = c0 + 1
+  ElseIf n(i, j3) = qn + 1 Then
+   Let c1 = c1 + 1
+  End If
+ Next j3
